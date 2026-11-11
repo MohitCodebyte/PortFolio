@@ -1,0 +1,373 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FiBarChart2,
+  FiCode,
+  FiExternalLink,
+  FiGithub,
+  FiChevronLeft,
+  FiChevronRight,
+  FiGrid,
+  FiLayers,
+  FiLock,
+} from 'react-icons/fi';
+import GlassCard from './GlassCard';
+import Badge from './Badge';
+import Tooltip from './Tooltip';
+import Button3D from './Button3D';
+import { triggerClickBurst } from '../three/hooks/useSceneStore';
+
+export function ProjectCardItem({ project, isFeatured = false }) {
+  const [imgStatus, setImgStatus] = useState('loading'); // 'loading' | 'loaded' | 'error'
+  const isDataScience = project.category === 'data-science';
+  const CategoryIcon = isDataScience ? FiBarChart2 : FiCode;
+
+  return (
+    <GlassCard
+      glow={isDataScience ? 'purple' : 'cyan'}
+      maxTilt={5}
+      className="h-full flex flex-col"
+      innerClassName="p-5 sm:p-6 flex flex-col justify-between gap-5"
+    >
+      <div>
+        {/* 16:9 Self-Hosted WebP Image Frame with Neon Gradient Overlay & Skeleton */}
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#070814] border border-white/10 mb-5 group">
+          {/* Skeleton Shimmer while loading */}
+          {imgStatus === 'loading' && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-zinc-900 overflow-hidden"
+            >
+              <div className="w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+            </div>
+          )}
+
+          {/* Self-hosted 800x450 WebP Image */}
+          {imgStatus !== 'error' && (
+            <img
+              src={project.image}
+              alt={`${project.title} preview`}
+              loading="lazy"
+              width="800"
+              height="450"
+              onLoad={() => setImgStatus('loaded')}
+              onError={() => setImgStatus('error')}
+              className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${
+                imgStatus === 'loaded' ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          )}
+
+          {/* Subtle Dark Purple/Blue Neon Theme Gradient Overlay */}
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 ${
+              isDataScience
+                ? 'bg-gradient-to-t from-[#070814]/85 via-purple-950/25 to-indigo-950/20'
+                : 'bg-gradient-to-t from-[#070814]/85 via-cyan-950/25 to-indigo-950/20'
+            }`}
+          />
+
+          {/* Gradient + Icon Fallback if File is Missing */}
+          {imgStatus === 'error' && (
+            <div
+              className={`w-full h-full flex flex-col items-center justify-center p-6 text-center ${
+                isDataScience
+                  ? 'bg-gradient-to-br from-purple-950/90 via-indigo-950/80 to-slate-950'
+                  : 'bg-gradient-to-br from-cyan-950/90 via-slate-900 to-indigo-950/80'
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center border mb-2 ${
+                  isDataScience
+                    ? 'bg-purple-500/20 border-purple-400/40 text-purple-300'
+                    : 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300'
+                }`}
+              >
+                <CategoryIcon className="w-6 h-6" aria-hidden="true" />
+              </div>
+              <p className="font-display text-sm font-bold text-white">
+                {project.title}
+              </p>
+            </div>
+          )}
+
+          {/* Top-Left Category Badge Only (Mono chip removed per spec) */}
+          <div className="absolute top-3 left-3 pointer-events-none">
+            <Badge
+              variant={isDataScience ? 'purple' : 'cyan'}
+              icon={CategoryIcon}
+              className="backdrop-blur-md bg-zinc-950/75"
+            >
+              {project.categoryLabel}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Title & Concise Description */}
+        <h3
+          className={`font-display font-bold text-white tracking-tight ${
+            isFeatured ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
+          }`}
+        >
+          {project.title}
+        </h3>
+        <p className="mt-2 text-sm text-zinc-300 leading-relaxed line-clamp-2">
+          {project.description}
+        </p>
+
+        {/* Tech Tags */}
+        <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Technologies used">
+          {project.tech.map((tag) => (
+            <Badge key={tag} variant="neutral">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer CTAs (Live Demo & GitHub / Disabled Repository Unavailable) */}
+      <div className="pt-4 border-t border-white/10">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button3D
+            href={project.liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant={isDataScience ? 'purple' : 'cyan'}
+            icon={FiExternalLink}
+            className="flex-1 min-w-[135px] py-2.5 px-4 text-xs sm:text-sm"
+          >
+            Live Demo
+          </Button3D>
+
+          {project.repoUrl ? (
+            <Button3D
+              href={project.repoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="glass"
+              icon={FiGithub}
+              className="flex-1 min-w-[125px] py-2.5 px-4 text-xs sm:text-sm"
+            >
+              GitHub
+            </Button3D>
+          ) : (
+            <div className="flex-1 min-w-[165px]">
+              <Tooltip content="Source repository is private or unavailable for public access">
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-full text-xs font-medium bg-white/[0.03] text-zinc-400 border border-white/10 opacity-60 cursor-not-allowed"
+                >
+                  <FiLock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>Repository unavailable</span>
+                </button>
+              </Tooltip>
+            </div>
+          )}
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
+
+export default function ProjectCarousel({ items, categoryKey }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [viewMode, setViewMode] = useState('grid'); // Default = 'grid'
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [categoryKey, items.length]);
+
+  const total = items.length;
+
+  const handlePrev = useCallback(() => {
+    setActiveIndex((prev) => (prev - 1 + total) % total);
+  }, [total]);
+
+  const handleNext = useCallback(() => {
+    setActiveIndex((prev) => (prev + 1) % total);
+  }, [total]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      handlePrev();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      handleNext();
+    }
+  };
+
+  if (total === 0) return null;
+
+  return (
+    <div
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label="Projects Showcase"
+      className="focus:outline-none"
+    >
+      {/* Clean Grid / Carousel Toggle (Right-aligned, no extra text clutter) */}
+      <div className="hidden md:flex items-center justify-end mb-5">
+        <div className="inline-flex items-center p-1 rounded-full bg-white/[0.04] border border-white/10">
+          <button
+            type="button"
+            onClick={(e) => {
+              triggerClickBurst(e.clientX, e.clientY, '#a855f7');
+              setViewMode('grid');
+            }}
+            aria-pressed={viewMode === 'grid'}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              viewMode === 'grid'
+                ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow'
+                : 'text-zinc-300 hover:text-white'
+            }`}
+          >
+            <FiGrid className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>3D Grid</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              triggerClickBurst(e.clientX, e.clientY, '#22d3ee');
+              setViewMode('carousel');
+            }}
+            aria-pressed={viewMode === 'carousel'}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              viewMode === 'carousel'
+                ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow'
+                : 'text-zinc-300 hover:text-white'
+            }`}
+          >
+            <FiLayers className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>3D Carousel</span>
+          </button>
+        </div>
+      </div>
+
+      {/* DESKTOP 3D COVERFLOW CAROUSEL STAGE (Generous height & padding so cards and images never clip) */}
+      {viewMode === 'carousel' && (
+        <div className="hidden md:block relative py-4">
+          <div className="relative min-h-[600px] py-8 flex items-center justify-center perspective-1000 overflow-visible">
+            <AnimatePresence initial={false}>
+              {items.map((project, idx) => {
+                let offset = idx - activeIndex;
+                if (offset > total / 2) offset -= total;
+                if (offset < -total / 2) offset += total;
+
+                if (Math.abs(offset) > 2) return null;
+
+                const isCenter = offset === 0;
+                const translateX = offset * 350;
+                const translateZ = -Math.abs(offset) * 140;
+                const rotateY = offset * -18;
+                const opacity = isCenter ? 1 : Math.abs(offset) === 1 ? 0.55 : 0.2;
+
+                return (
+                  <motion.div
+                    key={project.id}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={(_, info) => {
+                      if (info.offset.x < -60) handleNext();
+                      else if (info.offset.x > 60) handlePrev();
+                    }}
+                    onClick={() => {
+                      if (!isCenter) setActiveIndex(idx);
+                    }}
+                    animate={{
+                      x: translateX,
+                      z: translateZ,
+                      rotateY,
+                      scale: isCenter ? 1 : 0.86,
+                      opacity,
+                    }}
+                    transition={{ type: 'spring', stiffness: 180, damping: 24 }}
+                    style={{
+                      zIndex: 20 - Math.abs(offset),
+                      transformStyle: 'preserve-3d',
+                    }}
+                    className={`absolute w-[430px] max-w-[90vw] ${
+                      isCenter ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                    }`}
+                  >
+                    <ProjectCardItem project={project} isFeatured={isCenter} />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+
+          {/* 3D Carousel Controls */}
+          <div className="mt-2 flex items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous project in 3D carousel"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-white transition-all active:scale-95"
+            >
+              <FiChevronLeft className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2" role="tablist" aria-label="Carousel slide indicators">
+              {items.map((proj, i) => (
+                <button
+                  key={proj.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === activeIndex}
+                  aria-label={`Focus ${proj.title}`}
+                  onClick={() => setActiveIndex(i)}
+                  className={`h-2.5 rounded-full transition-all duration-200 ${
+                    i === activeIndex
+                      ? 'w-8 bg-gradient-to-r from-purple-400 to-cyan-400'
+                      : 'w-2.5 bg-white/20 hover:bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next project in 3D carousel"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-white transition-all active:scale-95"
+            >
+              <FiChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* RESPONSIVE 3D BENTO GRID (Always on Mobile, Default on Desktop) */}
+      <motion.div
+        layout
+        className={`${
+          viewMode === 'carousel' ? 'md:hidden' : 'grid'
+        } grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`}
+      >
+        <AnimatePresence mode="popLayout">
+          {items.map((project, idx) => (
+            <motion.div
+              key={project.id}
+              layout
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.94 }}
+              transition={{
+                duration: 0.38,
+                delay: idx * 0.04,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="h-full"
+            >
+              <ProjectCardItem project={project} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+}

@@ -1,0 +1,153 @@
+export const projectCategories = [
+  {
+    id: 'all',
+    label: 'All',
+    shortLabel: 'All',
+    count: 9,
+    heading: 'All Projects',
+    subtitle: 'Machine learning platforms and full-stack Python web applications.',
+  },
+  {
+    id: 'data-science',
+    label: 'Data Science',
+    shortLabel: 'Data Science',
+    count: 3,
+    badgeColor: 'purple',
+    heading: 'Data Science',
+    subtitle: 'Predictive modeling, customer intelligence, and NLP analytics.',
+  },
+  {
+    id: 'python-developer',
+    label: 'Python Developer',
+    shortLabel: 'Python Developer',
+    count: 6,
+    badgeColor: 'cyan',
+    heading: 'Python Developer',
+    subtitle: 'Render-hosted demos may take 30–50s to wake up.',
+  },
+];
+
+export const projects = [
+  // ==================== DATA SCIENCE (3) ====================
+  {
+    id: 'creditrisk-ai',
+    title: 'CreditRisk AI',
+    category: 'data-science',
+    categoryLabel: 'Data Science',
+    image: '/projects/creditrisk-ai.webp',
+    description:
+      'Credit default prediction engine using SMOTE class-balancing, ensemble gradient boosting, and borrower risk scoring.',
+    liveUrl: 'https://credit-risk-analysis-project1.vercel.app/',
+    repoUrl: 'https://github.com/MohitCodebyte/Credit-risk-Project',
+    isRenderHosted: false,
+    tech: ['Python', 'Scikit-learn', 'XGBoost', 'SMOTE', 'Pandas', 'NumPy'],
+  },
+  {
+    id: 'ecommerce-customer-intelligence',
+    title: 'E-Commerce Customer Intelligence Platform',
+    titleShort: 'E-Commerce Customer Intelligence',
+    category: 'data-science',
+    categoryLabel: 'Data Science',
+    image: '/projects/ecommerce-customer-intelligence.webp',
+    description:
+      'RFM behavioral segmentation, cohort retention modeling, and customer lifetime value forecasting platform.',
+    liveUrl: 'https://ecommerce-customer-intelligence-pla.vercel.app/',
+    repoUrl: 'https://github.com/MohitCodebyte/ecommerce-customer-intelligence-platform',
+    isRenderHosted: false,
+    tech: ['Python', 'Pandas', 'Scikit-learn', 'LightGBM', 'Seaborn', 'Matplotlib'],
+  },
+  {
+    id: 'nexus-ai-support',
+    title: 'Nexus AI Customer Support Intelligence',
+    titleShort: 'Nexus AI Support Intelligence',
+    category: 'data-science',
+    categoryLabel: 'Data Science',
+    image: '/projects/nexus-ai-support.webp',
+    description:
+      'NLP support ticket triage, sentiment classification, and automated routing analytics built with transformer pipelines.',
+    liveUrl: 'https://nexus-ai-support-frontend.vercel.app/',
+    repoUrl: 'https://github.com/MohitCodebyte/nexus-ai-customer-support-intelligence',
+    isRenderHosted: false,
+    tech: ['Python', 'Transformers', 'spaCy', 'NLTK', 'FastAPI', 'PyTorch'],
+  },
+
+  // ==================== PYTHON DEVELOPER (6) ====================
+  {
+    id: 'sahara-hospital',
+    title: 'Sahara Hospital Management System',
+    category: 'python-developer',
+    categoryLabel: 'Python Developer',
+    image: '/projects/sahara-hospital.webp',
+    description:
+      'Clinical workflow platform managing patient registration, doctor scheduling, appointment queues, and medical records.',
+    liveUrl: 'https://sahara-hospital-4.onrender.com/',
+    repoUrl: 'https://github.com/MohitCodebyte/Sahara-Hospital',
+    isRenderHosted: true,
+    tech: ['Python', 'Flask', 'MySQL', 'SQLAlchemy', 'REST APIs', 'HTML/CSS'],
+  },
+  {
+    id: 'ott-platform',
+    title: 'OTT Platform',
+    category: 'python-developer',
+    categoryLabel: 'Python Developer',
+    image: '/projects/ott-platform.webp',
+    description:
+      'Video streaming catalog with dynamic genre discovery, watchlist persistence, user profiles, and responsive playback.',
+    liveUrl: 'https://ott-platform-7os1.onrender.com/',
+    repoUrl: null,
+    isRenderHosted: true,
+    tech: ['Python', 'Django', 'REST APIs', 'SQL', 'HTML', 'CSS'],
+  },
+  {
+    id: 'kinder-kids-school',
+    title: 'Kinder Kids School',
+    category: 'python-developer',
+    categoryLabel: 'Python Developer',
+    image: '/projects/kinder-kids-school.webp',
+    description:
+      'Interactive school portal featuring admission inquiries, curriculum showcases, faculty directories, and parent modules.',
+    liveUrl: 'https://kinderkidsschool.onrender.com/',
+    repoUrl: 'https://github.com/MohitCodebyte/KinderGardenSchool',
+    isRenderHosted: true,
+    tech: ['Python', 'Flask', 'SQL', 'MySQL', 'HTML', 'CSS'],
+  },
+  {
+    id: 'ecommerce-website',
+    title: 'E-Commerce Website',
+    category: 'python-developer',
+    categoryLabel: 'Python Developer',
+    image: '/projects/ecommerce-website.webp',
+    description:
+      'Full-stack online storefront with dynamic product filtering, cart management, order processing, and inventory tracking.',
+    liveUrl: 'https://e-commerece-website-2-05ov.onrender.com/',
+    repoUrl: 'https://github.com/MohitCodebyte/E-Commerece-website',
+    isRenderHosted: true,
+    tech: ['Python', 'Flask', 'MySQL', 'SQLAlchemy', 'REST APIs', 'HTML/CSS'],
+  },
+  {
+    id: 'billing-management-system',
+    title: 'Billing Management System',
+    category: 'python-developer',
+    categoryLabel: 'Python Developer',
+    image: '/projects/billing-management.webp',
+    description:
+      'Automated invoicing, itemized tax calculation, receipt generation, and real-time ledger tracking application.',
+    liveUrl: 'https://billing-management-system-app-dnzv.vercel.app/',
+    repoUrl: 'https://github.com/MohitCodebyte/Billing-management-system-App',
+    isRenderHosted: false,
+    tech: ['Python', 'FastAPI', 'Pydantic', 'SQL', 'REST APIs', 'Vercel'],
+  },
+  {
+    id: 'edusphere-school-erp',
+    title: 'EduSphere School ERP',
+    category: 'python-developer',
+    categoryLabel: 'Python Developer',
+    image: '/projects/edusphere-school-erp.webp',
+    description:
+      'Role-based institutional ERP handling student attendance, examination grading, fee ledgers, and multi-role portals.',
+    liveUrl: 'https://edusphere-school-erp.vercel.app/login',
+    repoUrl: null,
+    isRenderHosted: false,
+    tech: ['Python', 'REST APIs', 'SQL', 'MySQL', 'Authentication', 'Vercel'],
+  },
+];

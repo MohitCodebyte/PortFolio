@@ -1,0 +1,108 @@
+export const siteConfig = {
+  name: 'Mohit Kushwah',
+  initials: 'MK',
+  headline: 'Data Scientist & Python Developer',
+  roles: ['Data Scientist', 'Python Developer'],
+  tagline:
+    'I build machine learning systems and Python web apps, from model to deployment.',
+  location: 'Gwalior, India',
+  email: 'kushwamitansh@gmail.com',
+  links: {
+    github: 'https://github.com/MohitCodebyte',
+    linkedin: 'https://www.linkedin.com/in/MohitCodebyte/',
+    email: 'mailto:kushwamitansh@gmail.com',
+  },
+  resumes: [
+    {
+      id: 'data-scientist',
+      label: 'Data Scientist Resume',
+      shortLabel: 'Data Scientist Resume',
+      roleTag: 'Data Science & ML',
+      file: '/resumes/data-scientist.pdf',
+      downloadName: 'Mohit-Kushwah-Data-Scientist-Resume.pdf',
+      color: 'purple',
+      icon: 'chart',
+    },
+    {
+      id: 'python-developer',
+      label: 'Python Developer Resume',
+      shortLabel: 'Python Developer Resume',
+      roleTag: 'Backend & Full-Stack Python',
+      file: '/resumes/python-developer.pdf',
+      downloadName: 'Mohit-Kushwah-Python-Developer-Resume.pdf',
+      color: 'cyan',
+      icon: 'code',
+    },
+  ],
+  navLinks: [
+    { id: 'home', label: 'Home', waypointIndex: 0 },
+    { id: 'about', label: 'About', waypointIndex: 1 },
+    { id: 'skills', label: 'Skills', waypointIndex: 2 },
+    { id: 'experience', label: 'Experience', waypointIndex: 3 },
+    { id: 'projects', label: 'Projects', waypointIndex: 4 },
+    { id: 'education', label: 'Education', waypointIndex: 5 },
+    { id: 'contact', label: 'Contact', waypointIndex: 6 },
+  ],
+  about: {
+    summary:
+      'I am a Data Scientist and Python Developer focused on turning complex data into predictive models and production-ready web applications. From training gradient-boosted credit risk engines and NLP classifiers to building full-stack ERPs and RESTful APIs, I bridge statistical modeling with clean software engineering.',
+    highlights: [
+      'End-to-end ML pipelines: feature engineering, SMOTE class-balancing, hyperparameter tuning, and interactive inference.',
+      'Full-stack Python development across Flask, FastAPI, and Django with relational SQL/MySQL backends.',
+      'Production deployment across Vercel and Render with Git version control and API testing.',
+    ],
+    stats: [
+      { value: 3, suffix: '', label: 'Data Science Projects', detail: 'ML & AI platforms deployed' },
+      { value: 6, suffix: '', label: 'Python Projects', detail: 'Full-stack web & ERP systems' },
+      { value: 6, suffix: '-Month', label: 'Internship', detail: 'Development Intern at NexvoraTech' },
+    ],
+  },
+  experience: [
+    {
+      id: 'nexvoratech',
+      role: 'Development Intern',
+      company: 'NexvoraTech',
+      period: 'Feb 2026 – Aug 2026',
+      mode: 'Hybrid',
+      location: 'Gwalior',
+      bullets: [
+        'Built full-lifecycle web applications from system architecture and development through production deployment.',
+        'Implemented backend functionality, RESTful APIs, relational databases, and seamless frontend-backend integration.',
+        'Executed systematic debugging, unit & integration testing, performance optimization, and cloud deployment workflows.',
+      ],
+      tech: ['Python', 'REST APIs', 'SQL', 'MySQL', 'HTML', 'CSS', 'Flutter'],
+    },
+  ],
+  education: {
+    degree: 'Bachelor of Technology (B.Tech)',
+    institution: 'Rajiv Gandhi Proudyogiki Vishwavidyalaya (RGPV)',
+    period: 'Jun 2024 – Jun 2028',
+    status: 'Pursuing',
+    coursework: ['Programming', 'Data Structures', 'Mathematics', 'Statistics'],
+  },
+  certifications: [
+    {
+      id: 'cert-python',
+      title: 'Python Developer Certificate',
+      issuer: 'NexvoraTech',
+      focus: 'Backend architecture, REST APIs, database integration & deployment',
+      badgeColor: 'cyan',
+    },
+    {
+      id: 'cert-ds',
+      title: 'Data Science Certification',
+      issuer: 'Coding Thinker Academy',
+      focus: 'Statistical modeling, machine learning pipelines, EDA & predictive analytics',
+      badgeColor: 'purple',
+    },
+  ],
+  cameraWaypoints: {
+    home: { position: [0, 0.2, 8.5], lookAt: [0, 0, 0], fov: 46 },
+    about: { position: [-2.4, 0.6, 5.2], lookAt: [-0.4, 0.1, -2], fov: 45 },
+    skills: { position: [2.6, -0.3, 2.0], lookAt: [0.3, -0.1, -6], fov: 48 },
+    experience: { position: [-1.8, 0.8, -1.8], lookAt: [0, 0.2, -10], fov: 45 },
+    projects: { position: [0, 0.4, -5.5], lookAt: [0, 0, -14], fov: 48 },
+    education: { position: [2.1, 0.5, -9.0], lookAt: [0.2, 0.1, -17], fov: 45 },
+    contact: { position: [0, 0.2, -12.5], lookAt: [0, 0, -20], fov: 44 },
+  },
+};
