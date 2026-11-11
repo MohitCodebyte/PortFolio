@@ -6,22 +6,21 @@ A complete, production-ready, 3D animated portfolio website for **Mohit Kushwah*
 
 ## ✨ Key Architectural Features
 
+- **Mobile-First Responsive Design (320px–768px & Tablet 768px–1024px)**:
+  - Zero horizontal overflow (`overflow-x: clip`, `min-width: 0`, `max-width: 100%`), `100svh`/`100dvh` viewport units, safe-area inset support (`env(safe-area-inset-*)`), fluid `clamp()` typography, and `44×44px+` touch targets.
+  - Compact `56px` mobile glass navbar with body-scroll-locking fullscreen menu and a swipe-dismissable **Bottom Sheet** for role-specific resumes.
+  - Automatic **Mobile-Lite 3D** mode (`dpr <= 1.25`, `antialias: false`, `powerPreference: "high-performance"`, postprocessing disabled, `<= 150` particles, low-poly centerpiece + 2 accents, and automatic tab visibility pause when `document.hidden`).
 - **Persistent Fixed 3D WebGL Canvas (`src/three/scenes/GlobalCanvas.jsx`)**:
   - Single `<Canvas>` behind all sections with scroll-synced 3D camera waypoints (`home`, `about`, `skills`, `experience`, `projects`, `education`, `contact`).
   - Custom GLSL flowing Aurora & FBM noise shader (`src/three/shaders/AuroraShader.js`) reactive to cursor and scroll progress.
-  - Focused Hero Neural Data Core positioned cleanly on the right side (`src/three/scenes/HeroNeuralCore.jsx`), plus subtle outer-margin accents that never overlap text or cards.
-  - GPU-instanced drifting starfield (`src/three/scenes/InstancedStarfield.jsx`) using `THREE.InstancedMesh`.
-  - Desktop post-processing (`Bloom`, `ChromaticAberration`, `Vignette`) with adaptive `<PerformanceMonitor>`, automatic Mobile Lite Mode, `prefers-reduced-motion` support, and non-WebGL static gradient fallback.
 - **Custom Animated Developer Cartoon Avatar (`src/components/Avatar.jsx`)**:
   - Inline SVG cartoon developer in a purple/cyan hoodie with glasses and a glowing laptop.
   - Features idle breathing/floating motion, periodic eye blinking, cursor-tracking pupils, laptop screen glow, and a wave animation on hover/click (static when `prefers-reduced-motion` is enabled).
-- **Custom 3D Desktop Cursor (`src/components/Cursor3D.jsx`)**:
-  - Glowing sphere + spring ring, magnetic pull toward buttons, and real-time particle burst + expanding shockwave ring on click. Automatically disabled on touch devices.
 - **Role-Specific Resume System (`src/components/ResumeButtons.jsx`)**:
-  - Placed in 3 dedicated locations: **Navbar** (`Resume` popover), **Projects** (one row above the tabs), and **Footer** (compact).
+  - Placed in 3 dedicated locations: **Navbar** (glass popover on desktop / bottom sheet via menu on mobile), **Projects** (above the tabs), and **Footer** (compact).
   - Direct PDF download (`download` attribute), secondary "View in new tab" button, and `HEAD` request verification with a friendly `"Resume file not found"` toast fallback if a PDF is missing.
 - **Self-Hosted WebP Projects Showcase (`src/sections/Projects.jsx` & `src/components/ProjectCarousel.jsx`)**:
-  - Filterable by **All (9)**, **Data Science (3)**, and **Python Developer (6)** with both a **3D Grid** view (default) and a **3D Carousel** stage (drag + keyboard `←` / `→` arrows).
+  - Sticky horizontally scrollable snap filter tabs (**All (9)**, **Data Science (3)**, **Python Developer (6)**).
   - Self-hosted 800×450 `.webp` images in `public/projects/` with 16:9 aspect ratio, dark purple/blue neon overlay, lazy loading, skeleton shimmer, and custom gradient+icon fallback.
 
 ---
@@ -116,18 +115,32 @@ All 9 project card thumbnails are self-hosted in `public/projects/*.webp` (resiz
 
 ---
 
-## 🌐 Deploying to Vercel
+## 🌐 Deploying to Vercel (PowerShell Commands)
 
-1. Push this repository to your GitHub account (`https://github.com/MohitCodebyte`).
-2. Log in to [https://vercel.com/](https://vercel.com/) and click **Add New...** → **Project**.
-3. Import your portfolio GitHub repository.
-4. Configure the build settings (Vercel auto-detects Vite):
-   - **Framework Preset**: `Vite`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-   - **Install Command**: `npm install`
-5. Expand **Environment Variables** and add (optional, for EmailJS):
-   - `VITE_EMAILJS_SERVICE_ID`
-   - `VITE_EMAILJS_TEMPLATE_ID`
-   - `VITE_EMAILJS_PUBLIC_KEY`
-6. Click **Deploy**.
+Run the following exact commands in Windows PowerShell from `d:\Data scientist\PortFolio`:
+
+```powershell
+# 1. Verify production build locally
+npm run build
+npm run preview
+
+# 2. Option A: Deploy directly from terminal with Vercel CLI
+npm i -g vercel
+vercel login
+vercel          # preview deploy
+vercel --prod   # production deploy
+
+# 3. Option B: Deploy via GitHub + Vercel Dashboard (auto-deploy on every push)
+git init
+git add .
+git commit -m "Initial portfolio commit"
+git branch -M main
+git remote add origin https://github.com/MohitCodebyte/<your-repo-name>.git
+git push -u origin main
+# Then go to https://vercel.com/new -> Import the GitHub repo ->
+# Framework Preset: Vite, Build Command: npm run build, Output Directory: dist ->
+# (Optional) Environment Variables: VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY ->
+# Click Deploy.
+```
+
+> **Note:** After deploying, replace `https://YOUR-DOMAIN.vercel.app` in `index.html`, `public/robots.txt`, and `public/sitemap.xml` with your live Vercel URL.

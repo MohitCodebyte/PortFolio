@@ -24,6 +24,8 @@ export async function verifyResumeFile(fileUrl) {
 export function SingleResumeAction({
   resume,
   compact = false,
+  footerMode = false,
+  fullWidthMobile = true,
   onActionComplete,
 }) {
   const [tiltStyle, setTiltStyle] = useState({});
@@ -37,7 +39,12 @@ export function SingleResumeAction({
   }, [resume.file]);
 
   const handleMouseMove = (e) => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      window.matchMedia('(pointer: coarse)').matches
+    ) {
+      return;
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
@@ -71,7 +78,6 @@ export function SingleResumeAction({
         });
         return;
       }
-      // Trigger download if it just became available
       const tempLink = document.createElement('a');
       tempLink.href = resume.file;
       tempLink.download = resume.downloadName;
@@ -140,31 +146,39 @@ export function SingleResumeAction({
       style={tiltStyle}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`inline-flex items-stretch rounded-full border backdrop-blur-md transition-all duration-200 ${shellStyles} ${
-        compact ? 'text-xs' : 'text-xs sm:text-sm'
-      }`}
+      className={`inline-flex items-stretch justify-between rounded-full border backdrop-blur-md transition-all duration-200 ${shellStyles} ${
+        footerMode
+          ? 'w-full lg:w-auto'
+          : fullWidthMobile
+          ? 'w-full sm:w-auto'
+          : 'w-full'
+      } ${compact ? 'min-h-[44px] text-xs' : 'min-h-[48px] text-xs sm:text-sm'}`}
     >
       {/* Direct Download Anchor */}
       <a
         href={resume.file}
         download={resume.downloadName}
         onClick={handleDownloadClick}
-        className={`group inline-flex items-center gap-2 font-semibold tracking-tight active:scale-[0.98] transition-transform ${
-          compact ? 'pl-3.5 pr-2.5 py-2' : 'pl-4 pr-3 py-2.5 sm:py-3'
+        className={`group flex-1 inline-flex items-center justify-center sm:justify-start gap-1.5 font-semibold tracking-tight whitespace-nowrap touch-manipulation active:scale-[0.97] transition-transform ${
+          footerMode
+            ? 'pl-3 pr-2 py-2'
+            : compact
+            ? 'pl-3.5 pr-2.5 py-2.5'
+            : 'pl-4 pr-3 py-3'
         }`}
       >
         <MainIcon
-          className={`w-4 h-4 shrink-0 ${iconTone} transition-transform duration-200 group-hover:scale-110`}
+          className={`w-3.5 h-3.5 shrink-0 ${iconTone} transition-transform duration-200 group-hover:scale-110`}
           aria-hidden="true"
         />
         <span>{resume.label}</span>
         <FiDownload
-          className="w-3.5 h-3.5 opacity-75 group-hover:translate-y-0.5 transition-transform"
+          className="w-3.5 h-3.5 shrink-0 opacity-80 group-hover:translate-y-0.5 transition-transform"
           aria-hidden="true"
         />
       </a>
 
-      {/* Secondary "View in new tab" icon button */}
+      {/* Secondary "View in new tab" icon button (>= 44x44px tap target) */}
       <Tooltip content={`View ${resume.shortLabel} in new tab`}>
         <a
           href={resume.file}
@@ -172,8 +186,8 @@ export function SingleResumeAction({
           rel="noopener noreferrer"
           onClick={handleViewClick}
           aria-label={`View ${resume.shortLabel} PDF in new tab`}
-          className={`inline-flex items-center justify-center border-l border-white/15 hover:bg-white/10 rounded-r-full transition-colors active:scale-95 ${
-            compact ? 'px-2.5' : 'px-3'
+          className={`inline-flex items-center justify-center min-w-[40px] sm:min-w-[42px] min-h-[44px] border-l border-white/15 hover:bg-white/10 active:bg-white/15 rounded-r-full touch-manipulation transition-colors active:scale-95 ${
+            footerMode ? 'px-2.5' : 'px-3'
           }`}
         >
           <FiExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
@@ -186,21 +200,26 @@ export function SingleResumeAction({
 export default function ResumeButtons({
   className = '',
   compact = false,
+  footerMode = false,
   onActionComplete,
 }) {
   return (
     <div
-      className={`flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 ${className}`}
+      className={
+        footerMode
+          ? `flex flex-col lg:flex-row lg:flex-nowrap items-stretch lg:items-center gap-2.5 w-full lg:w-auto ${className}`
+          : `flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto ${className}`
+      }
     >
       {siteConfig.resumes.map((resume) => (
         <SingleResumeAction
           key={resume.id}
           resume={resume}
           compact={compact}
+          footerMode={footerMode}
           onActionComplete={onActionComplete}
         />
       ))}
     </div>
   );
 }
-

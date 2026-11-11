@@ -8,7 +8,7 @@ export default function SectionHeading({
   align = 'left',
   accent = 'purple',
   id,
-  className = 'mb-10 md:mb-12',
+  className = 'mb-8 sm:mb-10 md:mb-12',
 }) {
   const alignClasses =
     align === 'center'
@@ -22,15 +22,15 @@ export default function SectionHeading({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 22 }}
+      initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className={`flex flex-col max-w-2xl ${alignClasses} ${className}`}
     >
       <h2
         id={id}
-        className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.12]"
+        className="font-display fluid-section-h2 md:text-5xl font-bold tracking-tight text-white leading-[1.15]"
       >
         {title}
         {highlight && (
@@ -45,7 +45,7 @@ export default function SectionHeading({
         )}
       </h2>
       {subtitle && (
-        <p className="mt-2.5 text-sm sm:text-base text-zinc-300 leading-relaxed">
+        <p className="mt-2.5 fluid-body text-zinc-300">
           {subtitle}
         </p>
       )}

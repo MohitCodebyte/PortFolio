@@ -43,10 +43,19 @@ export default function SkillOrbit({
   const containerRef = useRef(null);
   const [hoveredSkill, setHoveredSkill] = useState(null);
   const [projectedNodes, setProjectedNodes] = useState([]);
+  const [isMobileView, setIsMobileView] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   const rotationRef = useRef({ rx: 0.25, ry: 0.4, vx: 0.0025, vy: 0.0055 });
   const isPausedRef = useRef(false);
 
-  // Distribute skills evenly on a 3D Fibonacci sphere
+  useEffect(() => {
+    const onResize = () => setIsMobileView(window.innerWidth < 768);
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Distribute skills evenly on a 3D Fibonacci sphere (used on tablet/desktop >= 768px)
   const basePoints = useMemo(() => {
     const n = orbitSkills.length;
     const goldenAngle = Math.PI * (3 - Math.sqrt(5));
@@ -61,6 +70,7 @@ export default function SkillOrbit({
   }, []);
 
   useEffect(() => {
+    if (isMobileView) return;
     let rafId;
 
     const project = () => {
@@ -76,14 +86,12 @@ export default function SkillOrbit({
       const sinY = Math.sin(ry);
 
       const next = basePoints.map((pt) => {
-        // Rotate around Y
         const x1 = pt.x * cosY - pt.z * sinY;
         const z1 = pt.z * cosY + pt.x * sinY;
-        // Rotate around X
         const y2 = pt.y * cosX - z1 * sinX;
         const z2 = z1 * cosX + pt.y * sinX;
 
-        const depthScale = (z2 + 2.1) / 3.1; // ~0.35 to 1.0
+        const depthScale = (z2 + 2.1) / 3.1;
         const opacity = Math.min(1, Math.max(0.28, (z2 + 1.4) / 2.2));
 
         return {
@@ -103,10 +111,10 @@ export default function SkillOrbit({
 
     rafId = requestAnimationFrame(project);
     return () => cancelAnimationFrame(rafId);
-  }, [basePoints, prefersReducedMotion]);
+  }, [basePoints, prefersReducedMotion, isMobileView]);
 
   const handlePointerMove = (e) => {
-    if (!containerRef.current || prefersReducedMotion) return;
+    if (!containerRef.current || prefersReducedMotion || isMobileView) return;
     const rect = containerRef.current.getBoundingClientRect();
     const nx = (e.clientX - rect.left) / rect.width - 0.5;
     const ny = (e.clientY - rect.top) / rect.height - 0.5;
@@ -118,6 +126,77 @@ export default function SkillOrbit({
     hoveredSkill ||
     orbitSkills.find((s) => s.name === selectedSkillName) ||
     orbitSkills[0];
+
+  // Mobile (< 768px): Compact, light 3D/CSS floating icon strip (no cramped 440px sphere)
+  if (isMobileView) {
+    return (
+      <div className="w-full flex flex-col gap-3">
+        <div
+          role="region"
+          aria-label="Interactive Floating Skill Strip"
+          className="relative w-full overflow-x-auto no-scrollbar snap-x snap-mandatory py-2 -mx-1 px-1"
+        >
+          <div className="inline-flex items-center gap-2.5 min-w-max">
+            {orbitSkills.map((node, idx) => {
+              const IconComponent = ICON_MAP[node.name] || FiDatabase;
+              const isSelected = selectedSkillName === node.name;
+              return (
+                <button
+                  key={node.name}
+                  type="button"
+                  onClick={(e) => {
+                    if (e.clientX && e.clientY) {
+                      triggerClickBurst(e.clientX, e.clientY, node.color);
+                    }
+                    if (onSelectSkill) {
+                      onSelectSkill(isSelected ? null : node);
+                    }
+                  }}
+                  style={{
+                    animationDelay: `${idx * 120}ms`,
+                  }}
+                  className={`snap-start inline-flex items-center gap-2 min-h-[44px] px-3.5 py-2 rounded-2xl border backdrop-blur-md touch-manipulation transition-all active:scale-[0.96] ${
+                    isSelected
+                      ? 'bg-cyan-500/20 border-cyan-400/70 text-white shadow-[0_0_20px_rgba(34,211,238,0.4)]'
+                      : 'bg-[#0b0d1e]/90 border-white/12 text-zinc-200'
+                  }`}
+                >
+                  <IconComponent
+                    style={{ color: node.color }}
+                    className="w-4 h-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-xs font-semibold whitespace-nowrap">
+                    {node.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Active Skill Pill Bar */}
+        <div className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              style={{ backgroundColor: activeDetail.color }}
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-xs font-semibold text-white truncate">
+              {activeDetail.name}
+            </span>
+            <span className="text-xs text-zinc-400 truncate">
+              • {activeDetail.category}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 shrink-0">
+            {activeDetail.tier}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex flex-col items-center">
@@ -155,7 +234,7 @@ export default function SkillOrbit({
           const IconComponent = ICON_MAP[node.name] || FiDatabase;
           const isHovered = hoveredSkill?.name === node.name;
           const isSelected = selectedSkillName === node.name;
-          const radiusPx = 138; // Orbit radius in pixels
+          const radiusPx = 138;
 
           return (
             <button
@@ -226,13 +305,13 @@ export default function SkillOrbit({
             <p className="text-xs sm:text-sm font-semibold text-white truncate">
               {activeDetail.name}
             </p>
-            <p className="text-[11px] text-zinc-400 truncate">
+            <p className="text-xs text-zinc-400 truncate">
               Domain: {activeDetail.category}
             </p>
           </div>
         </div>
         <span
-          className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border shrink-0 ${
+          className={`px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 ${
             activeDetail.tier === 'Core'
               ? 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30'
               : 'bg-sky-500/15 text-sky-300 border-sky-400/30'
@@ -244,4 +323,3 @@ export default function SkillOrbit({
     </div>
   );
 }
-

@@ -41,10 +41,10 @@ class CanvasErrorBoundary extends React.Component {
 
 export default function App() {
   const capabilities = useDeviceCapabilities();
-  const { scrollToSection } = useSmoothScroll(capabilities.prefersReducedMotion);
+  const { scrollToSection } = useSmoothScroll(capabilities);
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#06060e] text-zinc-100 selection:bg-purple-500/30 selection:text-cyan-200">
+    <div className="relative min-h-[100dvh] max-w-full overflow-x-clip bg-[#06060e] text-zinc-100 selection:bg-purple-500/30 selection:text-cyan-200">
       {/* Keyboard Accessibility Skip Link */}
       <a
         href="#main-content"
@@ -56,7 +56,7 @@ export default function App() {
       {/* Cinematic 3D Preloader */}
       <Preloader prefersReducedMotion={capabilities.prefersReducedMotion} />
 
-      {/* Custom 3D Desktop Cursor + Particle Burst Canvas */}
+      {/* Custom 3D Desktop Cursor + Particle Burst Canvas (Disabled on touch devices) */}
       <Cursor3D enabled={!capabilities.isTouch && !capabilities.prefersReducedMotion} />
 
       {/* Persistent Fixed 3D WebGL Canvas Behind All Sections */}
@@ -77,7 +77,7 @@ export default function App() {
       <Navbar onNavigate={scrollToSection} />
 
       {/* Foreground HTML Sections Synced with 3D Camera Depth */}
-      <main id="main-content" className="relative z-10">
+      <main id="main-content" className="relative z-10 max-w-full overflow-x-clip">
         <Hero
           onNavigate={scrollToSection}
           prefersReducedMotion={capabilities.prefersReducedMotion}

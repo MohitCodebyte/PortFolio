@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiBarChart2, FiCode, FiLayers, FiClock } from 'react-icons/fi';
+import { FiBarChart2, FiCode, FiLayers } from 'react-icons/fi';
 import { projects, projectCategories } from '../data/projects';
 import SectionHeading from '../components/SectionHeading';
 import ProjectCarousel from '../components/ProjectCarousel';
@@ -34,28 +34,28 @@ export default function Projects() {
     <section
       id="projects"
       aria-labelledby="projects-heading"
-      className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+      className="relative py-16 sm:py-20 md:py-24 lg:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
     >
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 sm:gap-6 mb-6 sm:mb-8">
         <SectionHeading
           id="projects-heading"
           title="Featured"
           highlight="Projects"
-          subtitle="Production machine learning platforms and full-stack Python applications."
+          subtitle="Machine learning platforms and full-stack Python systems."
           accent="cyan"
           className="mb-0"
         />
 
-        {/* ONE Row with Both Resume Buttons Above the Tabs (Requirement 6) */}
+        {/* ONE Row with Both Resume Buttons Above the Tabs */}
         <ResumeButtons compact />
       </div>
 
-      {/* Category Filter Tabs: All | Data Science | Python Developer */}
-      <div className="mb-10">
+      {/* Category Filter Tabs: Horizontally scrollable pill bar with snap, sticky below navbar */}
+      <div className="sticky top-[64px] sm:top-[76px] z-20 mb-8 sm:mb-10 -mx-4 px-4 sm:mx-0 sm:px-0 py-2 bg-[#06060e]/85 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none">
         <div
           role="tablist"
           aria-label="Filter projects by specialization"
-          className="inline-flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-[#090a18]/85 border border-white/12 backdrop-blur-xl"
+          className="flex sm:inline-flex items-center gap-2 p-1.5 rounded-2xl bg-[#090a18]/90 border border-white/12 backdrop-blur-xl overflow-x-auto no-scrollbar snap-x snap-mandatory w-full sm:w-auto"
         >
           {projectCategories.map((cat) => {
             const isSelected = activeTab === cat.id;
@@ -73,7 +73,7 @@ export default function Projects() {
                 role="tab"
                 aria-selected={isSelected}
                 onClick={(e) => handleTabChange(e, cat.id)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                className={`snap-start shrink-0 inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap touch-manipulation transition-all duration-200 active:scale-[0.97] ${
                   isSelected
                     ? cat.id === 'python-developer'
                       ? 'bg-cyan-500/25 text-cyan-100 border border-cyan-400/50 shadow-[0_0_24px_-4px_rgba(34,211,238,0.5)]'
@@ -83,7 +83,7 @@ export default function Projects() {
               >
                 <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span>{cat.shortLabel}</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-mono-tabular bg-white/10 text-zinc-200">
+                <span className="px-2 py-0.5 rounded-full text-xs font-mono-tabular bg-white/10 text-zinc-200">
                   {cat.count}
                 </span>
               </button>
@@ -92,32 +92,27 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Animated Category Content */}
+      {/* Animated Category Content with 3D Flip/Slide Transition */}
       <AnimatePresence mode="wait">
         {activeTab === 'all' && (
           <motion.div
             key="tab-all"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.35 }}
-            className="space-y-16"
+            initial={{ opacity: 0, y: 18, rotateX: 6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, y: -12, rotateX: -4 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-12 sm:space-y-14 perspective-1000"
           >
             {/* GROUP 1: DATA SCIENCE (3 PROJECTS) */}
             <div>
-              <div className="pb-4 mb-6 border-b border-purple-500/25">
-                <div className="flex items-center gap-2.5">
-                  <FiBarChart2 className="w-5 h-5 text-purple-300" aria-hidden="true" />
-                  <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
-                    Data Science
-                  </h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-purple-500/15 text-purple-200 border border-purple-400/30">
-                    {dsProjects.length}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-zinc-300">
-                  Predictive modeling, customer intelligence, and NLP analytics.
-                </p>
+              <div className="pb-3 mb-5 border-b border-purple-500/25 flex items-center gap-2.5">
+                <FiBarChart2 className="w-5 h-5 text-purple-300 shrink-0" aria-hidden="true" />
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-white">
+                  Data Science
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-purple-500/15 text-purple-200 border border-purple-400/30">
+                  {dsProjects.length}
+                </span>
               </div>
 
               <ProjectCarousel items={dsProjects} categoryKey="ds-all" />
@@ -125,20 +120,14 @@ export default function Projects() {
 
             {/* GROUP 2: PYTHON DEVELOPER (6 PROJECTS) */}
             <div>
-              <div className="pb-4 mb-6 border-b border-cyan-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <FiCode className="w-5 h-5 text-cyan-300" aria-hidden="true" />
-                  <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
-                    Python Developer
-                  </h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-cyan-500/15 text-cyan-200 border border-cyan-400/30">
-                    {pyProjects.length}
-                  </span>
-                </div>
-                <p className="inline-flex items-center gap-1.5 text-xs text-amber-300/90">
-                  <FiClock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>Render-hosted demos may take 30–50s to wake up.</span>
-                </p>
+              <div className="pb-3 mb-5 border-b border-cyan-500/25 flex items-center gap-2.5">
+                <FiCode className="w-5 h-5 text-cyan-300 shrink-0" aria-hidden="true" />
+                <h3 className="font-display text-xl sm:text-2xl font-bold text-white">
+                  Python Developer
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-cyan-500/15 text-cyan-200 border border-cyan-400/30">
+                  {pyProjects.length}
+                </span>
               </div>
 
               <ProjectCarousel items={pyProjects} categoryKey="py-all" />
@@ -149,24 +138,20 @@ export default function Projects() {
         {activeTab === 'data-science' && (
           <motion.div
             key="tab-ds"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.35 }}
+            initial={{ opacity: 0, y: 18, rotateX: 6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, y: -12, rotateX: -4 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="perspective-1000"
           >
-            <div className="pb-4 mb-6 border-b border-purple-500/25">
-              <div className="flex items-center gap-2.5">
-                <FiBarChart2 className="w-5 h-5 text-purple-300" aria-hidden="true" />
-                <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
-                  Data Science
-                </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-purple-500/15 text-purple-200 border border-purple-400/30">
-                  {dsProjects.length}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-zinc-300">
-                Predictive modeling, customer intelligence, and NLP analytics.
-              </p>
+            <div className="pb-3 mb-5 border-b border-purple-500/25 flex items-center gap-2.5">
+              <FiBarChart2 className="w-5 h-5 text-purple-300 shrink-0" aria-hidden="true" />
+              <h3 className="font-display text-xl sm:text-2xl font-bold text-white">
+                Data Science
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-purple-500/15 text-purple-200 border border-purple-400/30">
+                {dsProjects.length}
+              </span>
             </div>
 
             <ProjectCarousel items={dsProjects} categoryKey="ds-filtered" />
@@ -176,25 +161,20 @@ export default function Projects() {
         {activeTab === 'python-developer' && (
           <motion.div
             key="tab-py"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.35 }}
+            initial={{ opacity: 0, y: 18, rotateX: 6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, y: -12, rotateX: -4 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="perspective-1000"
           >
-            <div className="pb-4 mb-6 border-b border-cyan-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <FiCode className="w-5 h-5 text-cyan-300" aria-hidden="true" />
-                <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
-                  Python Developer
-                </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-cyan-500/15 text-cyan-200 border border-cyan-400/30">
-                  {pyProjects.length}
-                </span>
-              </div>
-              <p className="inline-flex items-center gap-1.5 text-xs text-amber-300/90">
-                <FiClock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                <span>Render-hosted demos may take 30–50s to wake up.</span>
-              </p>
+            <div className="pb-3 mb-5 border-b border-cyan-500/25 flex items-center gap-2.5">
+              <FiCode className="w-5 h-5 text-cyan-300 shrink-0" aria-hidden="true" />
+              <h3 className="font-display text-xl sm:text-2xl font-bold text-white">
+                Python Developer
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono-tabular bg-cyan-500/15 text-cyan-200 border border-cyan-400/30">
+                {pyProjects.length}
+              </span>
             </div>
 
             <ProjectCarousel items={pyProjects} categoryKey="py-filtered" />

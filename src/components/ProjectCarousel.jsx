@@ -19,19 +19,45 @@ import { triggerClickBurst } from '../three/hooks/useSceneStore';
 
 export function ProjectCardItem({ project, isFeatured = false }) {
   const [imgStatus, setImgStatus] = useState('loading'); // 'loading' | 'loaded' | 'error'
+  const [imgParallax, setImgParallax] = useState({ x: 0, y: 0 });
   const isDataScience = project.category === 'data-science';
   const CategoryIcon = isDataScience ? FiBarChart2 : FiCode;
+
+  const visibleTech = project.tech.slice(0, 4);
+  const extraTechCount = Math.max(0, project.tech.length - 4);
+
+  const handleCardPointerMove = (e) => {
+    if (
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    setImgParallax({ x: -nx * 10, y: -ny * 10 });
+  };
+
+  const handleCardPointerLeave = () => {
+    setImgParallax({ x: 0, y: 0 });
+  };
 
   return (
     <GlassCard
       glow={isDataScience ? 'purple' : 'cyan'}
-      maxTilt={5}
-      className="h-full flex flex-col"
-      innerClassName="p-5 sm:p-6 flex flex-col justify-between gap-5"
+      maxTilt={6}
+      onPointerMove={handleCardPointerMove}
+      onPointerLeave={handleCardPointerLeave}
+      className="h-full w-full flex flex-col"
+      innerClassName="p-4 sm:p-6 flex flex-col justify-between gap-4 sm:gap-5 preserve-3d"
     >
-      <div>
-        {/* 16:9 Self-Hosted WebP Image Frame with Neon Gradient Overlay & Skeleton */}
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#070814] border border-white/10 mb-5 group">
+      <div className="preserve-3d">
+        {/* 16:9 Self-Hosted WebP Image Frame with Parallax Depth & Neon Overlay */}
+        <div
+          style={{ transform: 'translateZ(14px)' }}
+          className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#070814] border border-white/12 mb-4 sm:mb-5 group shadow-[0_12px_30px_-10px_rgba(0,0,0,0.75)]"
+        >
           {/* Skeleton Shimmer while loading */}
           {imgStatus === 'loading' && (
             <div
@@ -42,7 +68,7 @@ export function ProjectCardItem({ project, isFeatured = false }) {
             </div>
           )}
 
-          {/* Self-hosted 800x450 WebP Image */}
+          {/* Self-hosted 800x450 WebP Image with Parallax Shift */}
           {imgStatus !== 'error' && (
             <img
               src={project.image}
@@ -52,7 +78,12 @@ export function ProjectCardItem({ project, isFeatured = false }) {
               height="450"
               onLoad={() => setImgStatus('loaded')}
               onError={() => setImgStatus('error')}
-              className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${
+              style={{
+                transform: `translate3d(${imgParallax.x.toFixed(1)}px, ${imgParallax.y.toFixed(
+                  1
+                )}px, 0) scale(1.06)`,
+              }}
+              className={`w-full h-full object-cover object-center transition-transform duration-300 ease-out sm:group-hover:scale-110 ${
                 imgStatus === 'loaded' ? 'opacity-100' : 'opacity-0'
               }`}
             />
@@ -92,7 +123,7 @@ export function ProjectCardItem({ project, isFeatured = false }) {
             </div>
           )}
 
-          {/* Top-Left Category Badge Only (Mono chip removed per spec) */}
+          {/* Top-Left Category Badge */}
           <div className="absolute top-3 left-3 pointer-events-none">
             <Badge
               variant={isDataScience ? 'purple' : 'cyan'}
@@ -104,38 +135,55 @@ export function ProjectCardItem({ project, isFeatured = false }) {
           </div>
         </div>
 
-        {/* Title & Concise Description */}
-        <h3
-          className={`font-display font-bold text-white tracking-tight ${
-            isFeatured ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
-          }`}
-        >
-          {project.title}
-        </h3>
-        <p className="mt-2 text-sm text-zinc-300 leading-relaxed line-clamp-2">
-          {project.description}
-        </p>
+        {/* Title & 2-Line Description (Depth Layer) */}
+        <div style={{ transform: 'translateZ(18px)' }}>
+          <h3
+            className={`font-display font-bold text-white tracking-tight leading-snug ${
+              isFeatured ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
+            }`}
+          >
+            {project.title}
+          </h3>
+          <p className="mt-2 fluid-body text-zinc-300 line-clamp-2">
+            {project.description}
+          </p>
+        </div>
 
-        {/* Tech Tags */}
-        <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Technologies used">
-          {project.tech.map((tag) => (
+        {/* Tech Chips (wrap, max 4 shown + "+N") */}
+        <div
+          style={{ transform: 'translateZ(12px)' }}
+          className="mt-3.5 flex flex-wrap gap-1.5"
+          aria-label="Technologies used"
+        >
+          {visibleTech.map((tag) => (
             <Badge key={tag} variant="neutral">
               {tag}
             </Badge>
           ))}
+          {extraTechCount > 0 && (
+            <Badge
+              variant={isDataScience ? 'purple' : 'cyan'}
+              title={project.tech.slice(4).join(', ')}
+            >
+              +{extraTechCount}
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* Footer CTAs (Live Demo & GitHub / Disabled Repository Unavailable) */}
-      <div className="pt-4 border-t border-white/10">
-        <div className="flex flex-wrap items-center gap-2.5">
+      {/* Footer CTAs: Two Buttons Side by Side (Live Demo / GitHub), 48px high */}
+      <div
+        style={{ transform: 'translateZ(20px)' }}
+        className="pt-3.5 border-t border-white/10"
+      >
+        <div className="grid grid-cols-2 gap-2.5 items-stretch">
           <Button3D
             href={project.liveUrl}
             target="_blank"
             rel="noopener noreferrer"
             variant={isDataScience ? 'purple' : 'cyan'}
             icon={FiExternalLink}
-            className="flex-1 min-w-[135px] py-2.5 px-4 text-xs sm:text-sm"
+            className="w-full min-h-[48px] h-12 px-3 text-xs sm:text-sm"
           >
             Live Demo
           </Button3D>
@@ -147,24 +195,22 @@ export function ProjectCardItem({ project, isFeatured = false }) {
               rel="noopener noreferrer"
               variant="glass"
               icon={FiGithub}
-              className="flex-1 min-w-[125px] py-2.5 px-4 text-xs sm:text-sm"
+              className="w-full min-h-[48px] h-12 px-3 text-xs sm:text-sm"
             >
               GitHub
             </Button3D>
           ) : (
-            <div className="flex-1 min-w-[165px]">
-              <Tooltip content="Source repository is private or unavailable for public access">
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-full text-xs font-medium bg-white/[0.03] text-zinc-400 border border-white/10 opacity-60 cursor-not-allowed"
-                >
-                  <FiLock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>Repository unavailable</span>
-                </button>
-              </Tooltip>
-            </div>
+            <Tooltip content="Source repository is private or unavailable for public access">
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="w-full min-h-[48px] h-12 inline-flex items-center justify-center gap-1.5 px-2.5 rounded-full text-xs font-medium bg-white/[0.03] text-zinc-400 border border-white/10 opacity-65 cursor-not-allowed"
+              >
+                <FiLock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                <span className="truncate">Private Repo</span>
+              </button>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -204,12 +250,13 @@ export default function ProjectCarousel({ items, categoryKey }) {
 
   return (
     <div
+      role="region"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       aria-label="Projects Showcase"
-      className="focus:outline-none"
+      className="focus:outline-none perspective-1000"
     >
-      {/* Clean Grid / Carousel Toggle (Right-aligned, no extra text clutter) */}
+      {/* Clean Grid / Carousel Toggle (Desktop only — hidden on mobile) */}
       <div className="hidden md:flex items-center justify-end mb-5">
         <div className="inline-flex items-center p-1 rounded-full bg-white/[0.04] border border-white/10">
           <button
@@ -219,7 +266,7 @@ export default function ProjectCarousel({ items, categoryKey }) {
               setViewMode('grid');
             }}
             aria-pressed={viewMode === 'grid'}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               viewMode === 'grid'
                 ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow'
                 : 'text-zinc-300 hover:text-white'
@@ -235,7 +282,7 @@ export default function ProjectCarousel({ items, categoryKey }) {
               setViewMode('carousel');
             }}
             aria-pressed={viewMode === 'carousel'}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               viewMode === 'carousel'
                 ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow'
                 : 'text-zinc-300 hover:text-white'
@@ -247,7 +294,7 @@ export default function ProjectCarousel({ items, categoryKey }) {
         </div>
       </div>
 
-      {/* DESKTOP 3D COVERFLOW CAROUSEL STAGE (Generous height & padding so cards and images never clip) */}
+      {/* DESKTOP 3D COVERFLOW CAROUSEL STAGE */}
       {viewMode === 'carousel' && (
         <div className="hidden md:block relative py-4">
           <div className="relative min-h-[600px] py-8 flex items-center justify-center perspective-1000 overflow-visible">
@@ -341,33 +388,30 @@ export default function ProjectCarousel({ items, categoryKey }) {
         </div>
       )}
 
-      {/* RESPONSIVE 3D BENTO GRID (Always on Mobile, Default on Desktop) */}
-      <motion.div
-        layout
+      {/* RESPONSIVE 3D BENTO GRID WITH STAGGERED 3D FLIP/SLIDE ON TAB CHANGE */}
+      <div
         className={`${
           viewMode === 'carousel' ? 'md:hidden' : 'grid'
-        } grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`}
+        } grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6`}
       >
-        <AnimatePresence mode="popLayout">
-          {items.map((project, idx) => (
-            <motion.div
-              key={project.id}
-              layout
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.94 }}
-              transition={{
-                duration: 0.38,
-                delay: idx * 0.04,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="h-full"
-            >
-              <ProjectCardItem project={project} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </motion.div>
+        {items.map((project, idx) => (
+          <motion.div
+            key={`${categoryKey}-${project.id}`}
+            initial={{ opacity: 0, y: 24, rotateX: 12 }}
+            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{
+              duration: 0.42,
+              delay: Math.min(idx * 0.055, 0.24),
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            style={{ transformStyle: 'preserve-3d' }}
+            className="h-full"
+          >
+            <ProjectCardItem project={project} />
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }

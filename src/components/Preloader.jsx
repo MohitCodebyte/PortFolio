@@ -18,10 +18,10 @@ export default function Preloader({ prefersReducedMotion = false }) {
 
     const skipTimer = setTimeout(() => {
       setCanSkip(true);
-    }, 600);
+    }, 300);
 
     const startTime = performance.now();
-    const duration = 1350; // Fast, cinematic ramp that never blocks longer than needed
+    const duration = 680; // Fast, cinematic ramp that never delays LCP or blocks interaction
 
     let rafId;
     const tick = (now) => {
@@ -34,10 +34,8 @@ export default function Preloader({ prefersReducedMotion = false }) {
       if (ratio < 1) {
         rafId = requestAnimationFrame(tick);
       } else {
-        setTimeout(() => {
-          sceneState.preloaderDone = true;
-          setDismissed(true);
-        }, 220);
+        sceneState.preloaderDone = true;
+        setDismissed(true);
       }
     };
 

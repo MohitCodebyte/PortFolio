@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import {
@@ -6,7 +6,6 @@ import {
   FiGithub,
   FiLinkedin,
   FiSend,
-  FiMapPin,
   FiCheckCircle,
   FiAlertCircle,
 } from 'react-icons/fi';
@@ -14,7 +13,11 @@ import { siteConfig } from '../data/site';
 import SectionHeading from '../components/SectionHeading';
 import GlassCard from '../components/GlassCard';
 import Button3D from '../components/Button3D';
-import { showToast, triggerClickBurst } from '../three/hooks/useSceneStore';
+import {
+  showToast,
+  triggerClickBurst,
+  triggerPaperPlaneLaunch,
+} from '../three/hooks/useSceneStore';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -25,6 +28,9 @@ export default function Contact() {
   });
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle');
+  const [planeFlying, setPlaneFlying] = useState(false);
+  const [orbTilt, setOrbTilt] = useState({ x: 0, y: 0 });
+  const submitBtnWrapRef = useRef(null);
 
   const validate = () => {
     const nextErrors = {};
@@ -63,6 +69,21 @@ export default function Contact() {
     window.location.href = `mailto:${siteConfig.email}?subject=${subject}&body=${body}`;
   };
 
+  const fireSuccessEffects = () => {
+    triggerPaperPlaneLaunch();
+    setPlaneFlying(true);
+    setTimeout(() => setPlaneFlying(false), 2200);
+
+    if (submitBtnWrapRef.current) {
+      const rect = submitBtnWrapRef.current.getBoundingClientRect();
+      triggerClickBurst(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+        '#22d3ee'
+      );
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.honeypot) return;
@@ -91,6 +112,7 @@ export default function Contact() {
       !publicKey.includes('your_');
 
     if (!hasValidEnv) {
+      fireSuccessEffects();
       openMailtoFallback();
       setStatus('success');
       showToast({
@@ -116,6 +138,7 @@ export default function Contact() {
         { publicKey }
       );
 
+      fireSuccessEffects();
       setStatus('success');
       showToast({
         title: 'Message Sent!',
@@ -124,6 +147,7 @@ export default function Contact() {
       });
       setFormData({ name: '', email: '', message: '', honeypot: '' });
     } catch {
+      fireSuccessEffects();
       openMailtoFallback();
       setStatus('success');
       showToast({
@@ -134,132 +158,40 @@ export default function Contact() {
     }
   };
 
+  const handleOrbPointerMove = (e) => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 24;
+    const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 24;
+    setOrbTilt({ x: nx, y: ny });
+  };
+
   return (
     <section
       id="contact"
       aria-labelledby="contact-heading"
-      className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+      className="relative py-16 sm:py-20 md:py-24 lg:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
     >
       <SectionHeading
         id="contact-heading"
         title="Contact"
         highlight="Me"
-        subtitle="Reach out for Data Science and Python Developer opportunities."
+        subtitle="Available for Data Science and Python roles."
         accent="cyan"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        {/* Left: Direct Contact Channels */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch perspective-1000">
+        {/* Form First on Mobile (order-1 lg:order-2), Right Column on Desktop */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6 }}
-          className="lg:col-span-5 flex flex-col justify-between gap-6"
+          initial={{ opacity: 0, y: 22, rotateX: 8 }}
+          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{ transformStyle: 'preserve-3d' }}
+          className="order-1 lg:order-2 lg:col-span-7"
         >
-          <GlassCard
-            glow="purple"
-            maxTilt={5}
-            className="h-full"
-            innerClassName="p-6 sm:p-8 flex flex-col justify-between gap-6"
-          >
-            <div>
-              <h3 className="font-display text-2xl font-bold text-white mb-5">
-                Direct Channels
-              </h3>
-
-              <div className="space-y-3.5">
-                {/* Direct Email Card */}
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  onClick={(e) =>
-                    triggerClickBurst(e.clientX, e.clientY, '#22d3ee')
-                  }
-                  className="group flex items-center gap-4 p-4 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-400/45 transition-all"
-                >
-                  <div className="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 group-hover:scale-105 transition-transform">
-                    <FiMail className="w-5 h-5" aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-zinc-400">
-                      Direct Email
-                    </p>
-                    <p className="font-mono-tabular text-sm font-semibold text-white truncate">
-                      {siteConfig.email}
-                    </p>
-                  </div>
-                </a>
-
-                {/* LinkedIn Card */}
-                <a
-                  href={siteConfig.links.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) =>
-                    triggerClickBurst(e.clientX, e.clientY, '#a855f7')
-                  }
-                  className="group flex items-center gap-4 p-4 rounded-2xl bg-white/[0.04] hover:bg-purple-500/15 border border-white/10 hover:border-purple-400/45 transition-all"
-                >
-                  <div className="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300 shrink-0 group-hover:scale-105 transition-transform">
-                    <FiLinkedin className="w-5 h-5" aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-zinc-400">LinkedIn</p>
-                    <p className="text-sm font-semibold text-white truncate">
-                      linkedin.com/in/MohitCodebyte
-                    </p>
-                  </div>
-                </a>
-
-                {/* GitHub Card */}
-                <a
-                  href={siteConfig.links.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) =>
-                    triggerClickBurst(e.clientX, e.clientY, '#22d3ee')
-                  }
-                  className="group flex items-center gap-4 p-4 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/15 border border-white/10 hover:border-indigo-400/45 transition-all"
-                >
-                  <div className="w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0 group-hover:scale-105 transition-transform">
-                    <FiGithub className="w-5 h-5" aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-zinc-400">GitHub</p>
-                    <p className="text-sm font-semibold text-white truncate">
-                      github.com/MohitCodebyte
-                    </p>
-                  </div>
-                </a>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-zinc-400">
-              <span className="inline-flex items-center gap-1.5">
-                <FiMapPin className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
-                {siteConfig.location}
-              </span>
-              <span className="text-emerald-300 font-medium">
-                Remote / Hybrid / Onsite
-              </span>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Right: Glass 3D Contact Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="lg:col-span-7"
-        >
-          <GlassCard
-            glow="cyan"
-            tilt={false}
-            innerClassName="p-6 sm:p-8"
-          >
-            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          <GlassCard glow="cyan" tilt={false} innerClassName="p-5 sm:p-8">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4 sm:space-y-5">
               {/* Hidden Spam Honeypot */}
               <div className="hidden" aria-hidden="true">
                 <label htmlFor="contact-honeypot">
@@ -276,9 +208,9 @@ export default function Contact() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Name Field */}
-                <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                {/* Name Field (Focus = Glow + 3D Depth Lift) */}
+                <div className="flex flex-col gap-2 transition-transform duration-200 focus-within:-translate-y-0.5">
                   <label
                     htmlFor="contact-name"
                     className="text-xs font-semibold uppercase tracking-wider text-zinc-300"
@@ -289,6 +221,7 @@ export default function Contact() {
                     id="contact-name"
                     name="name"
                     type="text"
+                    inputMode="text"
                     required
                     autoComplete="name"
                     placeholder="Your name"
@@ -296,7 +229,7 @@ export default function Contact() {
                     onChange={handleChange}
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={errors.name ? 'error-name' : undefined}
-                    className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-zinc-500 transition-colors focus:bg-white/[0.07] ${
+                    className={`w-full min-h-[48px] px-4 py-3 rounded-xl bg-white/[0.04] border text-base text-white placeholder-zinc-500 transition-all duration-200 focus:bg-white/[0.07] focus:shadow-[0_10px_28px_-8px_rgba(34,211,238,0.45)] ${
                       errors.name
                         ? 'border-rose-500/70'
                         : 'border-white/12 focus:border-cyan-400'
@@ -313,8 +246,8 @@ export default function Contact() {
                   )}
                 </div>
 
-                {/* Email Field */}
-                <div className="flex flex-col gap-2">
+                {/* Email Field (Focus = Glow + 3D Depth Lift) */}
+                <div className="flex flex-col gap-2 transition-transform duration-200 focus-within:-translate-y-0.5">
                   <label
                     htmlFor="contact-email"
                     className="text-xs font-semibold uppercase tracking-wider text-zinc-300"
@@ -325,6 +258,7 @@ export default function Contact() {
                     id="contact-email"
                     name="email"
                     type="email"
+                    inputMode="email"
                     required
                     autoComplete="email"
                     placeholder="Your email"
@@ -332,7 +266,7 @@ export default function Contact() {
                     onChange={handleChange}
                     aria-invalid={Boolean(errors.email)}
                     aria-describedby={errors.email ? 'error-email' : undefined}
-                    className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-zinc-500 transition-colors focus:bg-white/[0.07] ${
+                    className={`w-full min-h-[48px] px-4 py-3 rounded-xl bg-white/[0.04] border text-base text-white placeholder-zinc-500 transition-all duration-200 focus:bg-white/[0.07] focus:shadow-[0_10px_28px_-8px_rgba(34,211,238,0.45)] ${
                       errors.email
                         ? 'border-rose-500/70'
                         : 'border-white/12 focus:border-cyan-400'
@@ -350,8 +284,8 @@ export default function Contact() {
                 </div>
               </div>
 
-              {/* Message Field */}
-              <div className="flex flex-col gap-2">
+              {/* Message Field (Focus = Glow + 3D Depth Lift) */}
+              <div className="flex flex-col gap-2 transition-transform duration-200 focus-within:-translate-y-0.5">
                 <label
                   htmlFor="contact-message"
                   className="text-xs font-semibold uppercase tracking-wider text-zinc-300"
@@ -361,14 +295,14 @@ export default function Contact() {
                 <textarea
                   id="contact-message"
                   name="message"
-                  rows={5}
+                  rows={4}
                   required
                   placeholder="Your message"
                   value={formData.message}
                   onChange={handleChange}
                   aria-invalid={Boolean(errors.message)}
                   aria-describedby={errors.message ? 'error-message' : undefined}
-                  className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-zinc-500 transition-colors focus:bg-white/[0.07] resize-y ${
+                  className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-base text-white placeholder-zinc-500 transition-all duration-200 focus:bg-white/[0.07] focus:shadow-[0_10px_28px_-8px_rgba(34,211,238,0.45)] resize-y ${
                     errors.message
                       ? 'border-rose-500/70'
                       : 'border-white/12 focus:border-cyan-400'
@@ -385,25 +319,167 @@ export default function Contact() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+              <div
+                ref={submitBtnWrapRef}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1"
+              >
                 <Button3D
                   type="submit"
                   variant="primary"
                   icon={FiSend}
                   disabled={status === 'submitting'}
-                  className="w-full sm:w-auto min-w-[190px]"
+                  className="w-full sm:w-auto min-w-[200px] min-h-[48px] h-12"
                 >
                   {status === 'submitting' ? 'Sending...' : 'Send Message'}
                 </Button3D>
 
                 {status === 'success' && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300">
+                  <span className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-emerald-300 shrink-0">
                     <FiCheckCircle className="w-4 h-4" aria-hidden="true" />
                     Message sent!
                   </span>
                 )}
               </div>
             </form>
+          </GlassCard>
+        </motion.div>
+
+        {/* Left Column on Desktop (order-2 lg:order-1): Interactive 3D Orb/Paper Plane + 3 Direct Link Rows */}
+        <motion.div
+          initial={{ opacity: 0, y: 22, rotateX: 8 }}
+          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+          style={{ transformStyle: 'preserve-3d' }}
+          className="order-2 lg:order-1 lg:col-span-5"
+        >
+          <GlassCard
+            glow="purple"
+            maxTilt={5}
+            onPointerMove={handleOrbPointerMove}
+            onPointerLeave={() => setOrbTilt({ x: 0, y: 0 })}
+            className="h-full"
+            innerClassName="p-5 sm:p-8 flex flex-col justify-between gap-5"
+          >
+            {/* Interactive Mouse-Reactive 3D Sphere + Orbiting Ring + Paper Plane Stage */}
+            <div
+              aria-hidden="true"
+              className="relative w-full h-36 sm:h-40 rounded-2xl bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.16)_0%,rgba(168,85,247,0.1)_48%,transparent_75%)] border border-white/10 overflow-hidden flex items-center justify-center perspective-1000"
+            >
+              <div
+                style={{
+                  transform: `rotateX(${(-orbTilt.y).toFixed(1)}deg) rotateY(${orbTilt.x.toFixed(
+                    1
+                  )}deg)`,
+                  transformStyle: 'preserve-3d',
+                }}
+                className="relative w-24 h-24 flex items-center justify-center transition-transform duration-150 ease-out"
+              >
+                {/* Glowing Core Sphere */}
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-400/40 via-indigo-500/40 to-purple-600/50 border border-cyan-300/50 shadow-[0_0_32px_rgba(34,211,238,0.55),inset_0_0_16px_rgba(168,85,247,0.6)]" />
+
+                {/* Orbiting Neon Ring */}
+                <div
+                  style={{ transform: 'rotateX(68deg) rotateY(-18deg)' }}
+                  className="absolute w-28 h-28 rounded-full border-2 border-purple-400/55 shadow-[0_0_18px_rgba(168,85,247,0.5)] animate-spin"
+                />
+
+                {/* 3D Paper Plane (Flies off on successful form send!) */}
+                <motion.div
+                  animate={
+                    planeFlying
+                      ? {
+                          x: [0, 140, 260],
+                          y: [0, -70, -140],
+                          scale: [1, 1.25, 0.2],
+                          opacity: [1, 1, 0],
+                          rotate: -28,
+                        }
+                      : {
+                          x: [0, 6, 0, -6, 0],
+                          y: [0, -5, 0, 5, 0],
+                          rotate: [-8, -2, -8],
+                          scale: 1,
+                          opacity: 1,
+                        }
+                  }
+                  transition={
+                    planeFlying
+                      ? { duration: 1.1, ease: [0.22, 1, 0.36, 1] }
+                      : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
+                  }
+                  className="absolute -top-1 -right-3 w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-300/60 backdrop-blur-md flex items-center justify-center text-cyan-200 shadow-[0_0_20px_rgba(34,211,238,0.75)]"
+                >
+                  <FiSend className="w-4 h-4" />
+                </motion.div>
+              </div>
+            </div>
+
+            {/* 3 Direct Channel Rows (Email, LinkedIn, GitHub) */}
+            <div className="space-y-3">
+              {/* Direct Email Row */}
+              <a
+                href={`mailto:${siteConfig.email}`}
+                onClick={(e) =>
+                  triggerClickBurst(e.clientX, e.clientY, '#22d3ee')
+                }
+                className="group w-full min-h-[60px] flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] hover:bg-cyan-500/15 active:bg-cyan-500/20 border border-white/10 hover:border-cyan-400/45 touch-manipulation transition-all active:scale-[0.98]"
+              >
+                <div className="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 group-hover:scale-105 transition-transform">
+                  <FiMail className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-zinc-400">
+                    Direct Email
+                  </p>
+                  <p className="font-mono-tabular text-sm font-semibold text-white truncate">
+                    {siteConfig.email}
+                  </p>
+                </div>
+              </a>
+
+              {/* LinkedIn Row */}
+              <a
+                href={siteConfig.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) =>
+                  triggerClickBurst(e.clientX, e.clientY, '#a855f7')
+                }
+                className="group w-full min-h-[60px] flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] hover:bg-purple-500/15 active:bg-purple-500/20 border border-white/10 hover:border-purple-400/45 touch-manipulation transition-all active:scale-[0.98]"
+              >
+                <div className="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300 shrink-0 group-hover:scale-105 transition-transform">
+                  <FiLinkedin className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-zinc-400">LinkedIn</p>
+                  <p className="text-sm font-semibold text-white truncate">
+                    linkedin.com/in/MohitCodebyte
+                  </p>
+                </div>
+              </a>
+
+              {/* GitHub Row */}
+              <a
+                href={siteConfig.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) =>
+                  triggerClickBurst(e.clientX, e.clientY, '#22d3ee')
+                }
+                className="group w-full min-h-[60px] flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] hover:bg-indigo-500/15 active:bg-indigo-500/20 border border-white/10 hover:border-indigo-400/45 touch-manipulation transition-all active:scale-[0.98]"
+              >
+                <div className="w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0 group-hover:scale-105 transition-transform">
+                  <FiGithub className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-zinc-400">GitHub</p>
+                  <p className="text-sm font-semibold text-white truncate">
+                    github.com/MohitCodebyte
+                  </p>
+                </div>
+              </a>
+            </div>
           </GlassCard>
         </motion.div>
       </div>

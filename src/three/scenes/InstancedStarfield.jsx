@@ -18,7 +18,7 @@ export default function InstancedStarfield({ count = 420, prefersReducedMotion =
 
       const x = (r1 - 0.5) * 28;
       const y = (r2 - 0.5) * 18;
-      const z = 8 - r3 * 34; // spans from +8 to -26
+      const z = 8 - r3 * 42; // spans from +8 to -34 (all the way past Footer)
       const scale = 0.018 + (i % 7) * 0.008;
       const speed = 0.15 + (i % 5) * 0.08;
       const phase = i * 0.37;

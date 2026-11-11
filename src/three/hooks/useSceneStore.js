@@ -13,6 +13,7 @@ export const sceneState = {
   },
   burstQueue: [], // 3D or 2D click burst triggers
   preloaderDone: false,
+  contactPlaneLaunchAt: 0, // timestamp when contact form paper plane is launched
 };
 
 const sectionListeners = new Set();
@@ -28,6 +29,10 @@ export function setActiveSection(sectionId) {
 export function subscribeActiveSection(listener) {
   sectionListeners.add(listener);
   return () => sectionListeners.delete(listener);
+}
+
+export function triggerPaperPlaneLaunch() {
+  sceneState.contactPlaneLaunchAt = performance.now();
 }
 
 let toastIdCounter = 1;
@@ -55,4 +60,3 @@ export function triggerClickBurst(clientX, clientY, color = '#22d3ee') {
     })
   );
 }
-
